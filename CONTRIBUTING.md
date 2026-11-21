@@ -16,7 +16,10 @@
 3. Keep each PR focused on one logical change, and keep it small enough to review in one sitting.
 4. Run `mvn verify` locally before pushing.
 5. Open a PR against `main` and fill in the template.
-6. CI (`.github/workflows/ci.yml`) must be green before merging.
+6. Review the PR right after creating it. Go through the full diff on GitHub as a
+   reviewer would, checking correctness, edge cases, test coverage, naming and docs.
+   Leave review comments for anything that needs changing, push fixes to the same
+   branch, and resolve the comments. Merge only once the review has no open points.
 7. Merge with **Squash and merge**, so each PR becomes one descriptive commit on `main`.
    This keeps the history readable and guarantees that the extra feature lands as a
    distinct commit.
