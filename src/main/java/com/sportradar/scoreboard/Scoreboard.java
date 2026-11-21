@@ -146,6 +146,9 @@ public final class Scoreboard {
     /**
      * Unregisters a listener. Does nothing if it isn't registered.
      *
+     * <p>Listeners are notified outside the lock, so a notification already in progress on another
+     * thread may still reach the listener shortly after this method returns.
+     *
      * @throws NullPointerException if {@code listener} is {@code null}
      */
     public void removeListener(ScoreChangeListener listener) {
