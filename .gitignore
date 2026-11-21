@@ -1,0 +1,18 @@
+# Maven
+target/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Eclipse / VS Code
+.classpath
+.project
+.settings/
+.vscode/
+
+# OS
+.DS_Store
+
+# Claude Code local settings
+.claude/settings.local.json
