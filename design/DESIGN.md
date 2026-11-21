@@ -48,7 +48,7 @@ record Match(String homeTeam, String awayTeam, int homeScore, int awayScore, lon
 ```
 
 - The compact constructor rejects null or blank team names and negative scores.
-- `int totalScore()` returns `homeScore + awayScore`.
+- `long totalScore()` returns `homeScore + awayScore`. It's a `long` so the sum can't overflow.
 - `Match withScore(int homeScore, int awayScore)` returns a new `Match` with the new score.
 - `MatchId id()` returns the match's key.
 - `toString()` returns `"Mexico 0 – Canada 5"`.
@@ -70,8 +70,9 @@ Collection<Match> findAll();
 
 The contract: `Scoreboard` makes every call while holding its lock. Reads (`find`, `findAll`)
 may run at the same time as each other, but never at the same time as a write. Because of
-that, implementations need no locking of their own. `InMemoryMatchRepository` wraps a
-`HashMap`.
+that, implementations need no locking of their own. `findAll()` may return a copy or an
+unmodifiable view, because the scoreboard copies the result before releasing the lock.
+`InMemoryMatchRepository` wraps a `HashMap`.
 
 ### `exception`
 
@@ -89,16 +90,19 @@ Scoreboard()                                   // uses InMemoryMatchRepository
 Scoreboard(MatchRepository repository)
 Match startMatch(String homeTeam, String awayTeam)
 Match updateScore(String homeTeam, String awayTeam, int homeScore, int awayScore)
-void finishMatch(String homeTeam, String awayTeam)
+Match finishMatch(String homeTeam, String awayTeam)
 List<Match> getSummary()
 ```
+
+If the repository passed to the constructor already contains matches, new matches get a
+higher `startOrder` than any of them, so they are treated as started later.
 
 | Operation | Lock | Behaviour |
 |-----------|------|-----------|
 | `startMatch` | write | Throws `TeamAlreadyPlayingException` if either team is playing in any live match (checked by scanning all live matches, O(n)). Otherwise saves the match at 0–0 with `startOrder = ++sequence`. |
 | `updateScore` | write | Looks up the match by `MatchId` (or throws `MatchNotFoundException`), then saves `withScore(...)`. Returns the updated match. |
-| `finishMatch` | write | Looks up the match (or throws `MatchNotFoundException`), then removes it. |
-| `getSummary` | read | Sorts by `totalScore` highest first, then by `startOrder` highest first, and returns `List.copyOf(...)`. |
+| `finishMatch` | write | Looks up the match (or throws `MatchNotFoundException`), then removes it. Returns the match with its final score. |
+| `getSummary` | read | Copies the live matches while holding the read lock. After releasing it, sorts the copy by `totalScore` highest first, then by `startOrder` highest first, and returns an unmodifiable list. |
 
 Checking the expected order from the task: Argentina 3–1 and Germany 2–2 both total 4.
 Argentina was started later, so it comes first.
@@ -168,9 +172,6 @@ Each PR is merged with squash and merge, so it becomes one commit on `main`.
 |----|--------|----------|
 | 1 | `build/pr-workflow` | PR template, `CONTRIBUTING.md`, `.gitignore` |
 | 2 | `docs/design` | This document |
-| 3 | `build/maven-skeleton` | `pom.xml` (Java 21, JUnit 5, AssertJ), `README.md` and `AI.md` with placeholder sections, a prompt log so far |
-| 4 | `feat/domain-model` | `model` and `exception` packages, with tests |
-| 5 | `feat/match-repository` | `MatchRepository` and `InMemoryMatchRepository`, with tests |
-| 6 | `feat/scoreboard-core` | `Scoreboard` with the four required operations, the read/write lock, the example scenario test and a concurrency test |
-| 7 | `feat/score-change-listener` | **The extra feature only.** This is the distinct commit the task requires. |
-| 8 | `docs/readme-ai` | Final `README.md` (assumptions, reasoning, trade-offs, the extra feature) and `AI.md` (how AI was used, prompt history, artifacts) |
+| 3 | `build/maven-skeleton` | `pom.xml` (Java 21, JUnit 5, AssertJ) and the scoreboard core: `model`, `exception` and `repository` packages and `Scoreboard` with the four required operations, the read/write lock, the example scenario test and a concurrency test |
+| 4 | `feat/score-change-listener` | **The extra feature only.** This is the distinct commit the task requires. |
+| 5 | `docs/readme-ai` | `README.md` (assumptions, reasoning, trade-offs, the extra feature) and `AI.md` (how AI was used, prompt history, artifacts) |
