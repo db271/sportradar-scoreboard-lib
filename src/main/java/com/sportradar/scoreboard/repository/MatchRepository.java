@@ -39,8 +39,8 @@ public interface MatchRepository {
     /**
      * Returns all stored matches in no particular order.
      *
-     * <p>The returned collection is a snapshot: it must not change when the repository changes
-     * later, because the scoreboard sorts it after releasing its lock.
+     * <p>The result may be a copy or an unmodifiable view. The scoreboard only uses it while
+     * holding its lock, and copies it before releasing the lock when it needs to keep it.
      */
     Collection<Match> findAll();
 }
