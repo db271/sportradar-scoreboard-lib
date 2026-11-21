@@ -16,3 +16,6 @@ target/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Task description (not redistributed)
+docs/ODDS and Data - JAVA Coding Task.pdf
