@@ -139,15 +139,21 @@ void removeListener(ScoreChangeListener listener);
   engines, websites, apps). Calling the consumer when a score changes means it doesn't have
   to keep polling `getSummary()`.
 - Listeners are kept in a `CopyOnWriteArrayList`, so they can be added or removed while
-  notifications are being sent.
+  notifications are being sent, even by a listener removing itself. Adding a listener that is
+  already registered has no effect (`addIfAbsent`).
+- Listeners are called only when the score actually changes. An update that sets the same
+  score, or one that fails, doesn't notify anyone. Starting and finishing a match don't
+  notify either: the feature is about score changes.
 - `updateScore` changes the state while holding the write lock, and **calls the listeners
   only after releasing it**. That way a slow listener, or one that calls back into the
   scoreboard, can't block or deadlock it.
-- If a listener throws, the exception is logged through `System.Logger` and the remaining
-  listeners are still called. The update has already been committed at that point, so
+- If a listener throws a `RuntimeException`, it is logged through `System.Logger` (no logging
+  dependency) and the remaining listeners are still called. `Error`s are not caught. The update has already been committed at that point, so
   passing the exception on to the caller of `updateScore` would mislead them.
-- Known limitation, to be documented: when two threads update scores at the same moment,
-  their notifications can arrive in either order.
+- Known limitation, documented in the `ScoreChangeListener` Javadoc: when two threads update
+  scores at the same moment, their notifications can arrive in either order. Consumers should
+  rely on `previous` and `current`, not on arrival order. Keeping the order would mean calling
+  listeners while holding the lock, which is the problem described above.
 
 ## 6. Testing strategy
 
