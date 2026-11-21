@@ -27,8 +27,9 @@ stages:
    feature on its own (#4), then this documentation (#5). I changed the plan along the way,
    merging the planned model, repository and core PRs into one, and moving README/AI.md to
    the end.
-5. **Review.** After opening each PR, Claude reviewed the full diff as a reviewer would,
-   posted the findings on the PR and pushed fixes. I reviewed and merged.
+5. **Review.** From #3 on, Claude reviewed the full diff right after opening each PR, as a
+   reviewer would, posted the findings on the PR and pushed fixes. #1 and #2 went through
+   before that rule was in place. I reviewed and merged every PR.
 6. **History.** I merged the first PRs with merge commits instead of squashing. Claude
    rebuilt `main` as one commit per PR, with exactly the same files, and I force-pushed it.
 

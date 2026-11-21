@@ -177,6 +177,7 @@ The feature was introduced in a single commit: *Add score-change listeners (extr
 
 ## How this was built
 
-The work was delivered as small pull requests, each reviewed right after it was opened and
-squashed into one commit on `main`. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow
+The work was delivered as small pull requests, each squashed into one commit on `main`.
+From #3 on, each PR was reviewed right after it was opened, and the findings were fixed
+before merging. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow
 and [AI.md](AI.md) for how AI tools were used, including the full prompt history.
